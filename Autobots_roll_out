@@ -1,0 +1,265 @@
+Skip to content
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@TaylorMadel11 
+shehzanwar
+/
+FSE100_SP20_ASU
+1
+0
+0
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Update AutobotsRollOut
+ master
+@MJC04ASU
+MJC04ASU committed on Apr 22, 2020 
+1 parent 6b4f3c8 commit 028981c69e27ab42d4485d11e723fd54b4283e6c
+Showing  with 108 additions and 46 deletions.
+  154  AutobotsRollOut 
+@@ -3,23 +3,70 @@ global green
+global red
+global blue
+global key
+global mycolorsensor
+global speed
+global slowdown
+global speedup
+global r
+global g
+global b
+global last
+
+%global mycolorsensor
+InitKeyboard();
+
+green = 0;
+red = 0;
+blue = 0;
+speed = 22;
+speedup = 1.25;
+slowdown = 1.25;
+
+
+
+
+    %print color of object
+%     fprintf("\tRed: %d\n", color_rgb(1));
+%     fprintf("\tGreen: %d\n", color_rgb(2));
+%     fprintf("\tBlue: %d\n", color_rgb(3));
+%     
+%     r = color_rgb(1);
+%     g = color_rgb(2);
+%     b = color_rgb(3);
+
+
+mycolorsensor = colorSensor('GUNI');
+%mycolorsensor = colorSensor('GUNI');
+%brick.SetColorMode(1, 2);  % Set Color Sensor connected to Port 1 to Color RGB Mode.
+
+while 1
+    pause (0.1);
+
+    green = 0;
+    blue = 0;
+    red = 0;
+    color = readColor(mycolorsensor);
+    %color = brick.ColorCode(1);  % Get Color on port 1.
+    display(color);                 % Print color code of object.
+    color_rgb = brick.ColorRGB(1);  % Get Color on port 1.
+    %print color of object
+    fprintf("\tRed: %d\n", color_rgb(1));
+    fprintf("\tGreen: %d\n", color_rgb(2));
+    fprintf("\tBlue: %d\n", color_rgb(3));
+
+
+
+    r = color_rgb(1);
+    g = color_rgb(2);
+    b = color_rgb(3);
+
+    if(r >= 245 && g >= 230 && b <= 170)
+        color = 3; %Yellow
+    elseif(r >= 150 && g >= 150 && b >= 150)
+        color = 6; %White
+    elseif(r <= 80 && g <= 140 && b <= 50)
+        color = 1; %BLACK
+    elseif(r >= 150 && g <= 50 && b <= 50)
+        color = 5; %RED
+    elseif(r >= 100 && g >= 180 && b >= 200)
+        color = 2; %BLUE
+    else
+        color = 0;
+    end
+
+
+% 0 no color
+% 1 black
+% 2 blue
+@@ -28,81 +75,96 @@ while 1
+% 5 red
+% 6 white
+% 7 brown
+    switch key
+        case 'q'
+            disp ('bye bye');
+            brick.StopAllMotors();
+            break;
+
+    end
+
+
+    switch color    % A left motor B right motor D claw motor
+        case 'none'
+        case 0 %No Color
+            disp('Waiting!');
+            brick.MoveMotor('A',0);
+            brick.MoveMotor('B',0);
+            brick.MoveMotor('D',0);
+            if(last == 1)
+                brick.MoveMotor('A',0);
+                brick.MoveMotor('B',speed/slowdown);
+            else
+                brick.MoveMotor('A',speed/slowdown);
+                brick.MoveMotor('B',0);
+            end
+
+        case 'black'
+        case 1 %Black
+            disp('Black! L');
+            brick.MoveMotor('A',50);
+            brick.MoveMotor('B',100);
+            brick.MoveMotor('A',speed/slowdown);
+            brick.MoveMotor('B',speed*speedup);
+            last = 1;
+
+
+        case 'blue'
+        case 2 %Blue
+            disp('Blue, drop off'); % this is the drop off code
+            if blue == 0
+                brick.MoveMotor('A', 0);
+                brick.MoveMotor('B', 0);
+                brick.MoveMotor('D', -50);
+                pause (0.5);
+                brick.MoveMotor('D', 50);
+                pause (.5);
+                brick.MoveMotor('D', 0);
+                blue = 1;
+            end
+            brick.MoveMotor('A',100);
+            brick.MoveMotor('B',50);            
+            brick.MoveMotor('A',-speed);
+            brick.MoveMotor('B',-speed);
+            pause(.5)
+            brick.StopAllMotors();
+            break;
+
+        case 'green'
+            disp('Green, pickup'); % this is the pickup code
+        case 3 %Yellow
+
+            disp('Yellow, pickup'); % this is the pickup code
+            if green == 0
+                brick.MoveMotor('A', 0);
+                brick.MoveMotor('B', 0);
+                brick.MoveMotor('D', 50);
+                pause (0.5);
+                brick.MoveMotor('D', -50);
+                pause (1.0);
+                brick.MoveMotor('D', 0);
+                green = 1;
+            end
+
+                brick.MoveMotor('A',100);
+                brick.MoveMotor('B',50);
+                brick.MoveMotor('A',speed*speedup);
+                brick.MoveMotor('B',speed/slowdown);
+                green = 1;
+
+
+        case 'yellow'
+            disp('Yellow');
+            brick.MoveMotor('A',00);
+            brick.MoveMotor('B',00); 
+            brick.MoveMotor('D',00);
+        case 4 %Yello
+             disp('Yellow');
+             brick.MoveMotor('A',00);
+             brick.MoveMotor('B',00); 
+             brick.MoveMotor('D',00);
+
+        case 'red'
+        case 5 %Red
+            disp('Red, STOP'); %stop for 4 seconds
+            if red == 0
+                brick.MoveMotor('A', 0);
+                brick.MoveMotor('B', 0);
+                pause (4.0);
+                pause (2.0);
+                red = 1;
+            end
+                brick.MoveMotor('A',100);
+                brick.MoveMotor('B',50);
+                brick.MoveMotor('A',speed*speedup);
+                brick.MoveMotor('B',speed/slowdown);
+
+
+        case 'white'          % No Key is being pressed
+        case 6 %White          % No Key is being pressed
+            disp('White! R');
+            brick.MoveMotor('A',100);
+            brick.MoveMotor('B',50);
+            brick.MoveMotor('A',speed*speedup);
+            brick.MoveMotor('B',speed/slowdown);
+            last = 0;
+            red = 0;
+            green = 0;
+            blue = 0;
+
+    end
+
+    switch key
+        case 'q'
+            disp ('bye bye');
+            break;
+
+    end
+
+end
+
+
+closeKeyboard();
+
+0 comments on commit 028981c
+@TaylorMadel11
+ 
+ 
+Leave a comment
+No file chosen
+Attach files by dragging & dropping, selecting or pasting them.
+ You’re not receiving notifications from this thread.
+© 2021 GitHub, Inc.
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
+Loading complete
